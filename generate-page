@@ -79,6 +79,7 @@ print("""
             margin: 0 auto 10px;
         }
     </style>
+    <title>American Dad - Who Wrote What?</title>
 </head>
 <body>
 <h1>Who wrote which American Dad episodes?</h1>
