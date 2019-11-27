@@ -1,0 +1,11 @@
+#!/bin/sh
+urls=$(cat wiki.html |
+  grep -o 'https://vignette.wikia.nocookie.net/americandad/images/[^"]*' |
+  grep 'latest?cb=')
+
+num=0
+for u in $urls; do
+  sleep 1;
+  num=$((num + 1))
+  curl "$u" > "$num"
+done

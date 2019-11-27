@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+import sys
+import re
+from operator import itemgetter
+from bs4 import BeautifulSoup
+
+soup = BeautifulSoup(sys.stdin, 'html.parser')
+dads = soup.find_all('tr', {'class': 'vevent'})
+
+last_heading = ""
+
+episodes = []
+increment_episodes = 0
+
+for num, d in enumerate(dads):
+    heading = d.parent.parent.previous_sibling.previous_sibling.get_text()
+    if heading != last_heading:
+        if "animation" in heading:
+            heading = "(season 5)"
+        matched = re.findall(r"\(.*\)", heading)
+        if matched:
+            season = matched[0][1:-1]
+            if season == "Episode 10":
+                season = "season 6"
+            current_season = season.split(" ")[1]
+
+            if current_season == "2":
+                increment_episodes = 7
+            elif current_season == "12":
+                increment_episodes = 3
+            else:
+                increment_episodes = 0
+
+            if int(current_season) > 1:
+                current_season = str(int(current_season) - 1)
+            if int(current_season) > 10:
+                current_season = str(int(current_season) - 1)
+
+        last_heading = heading
+
+    data = list(da.get_text().strip() for da in d.find_all('td'))[0:4]
+    data[1] = data[1][1:-1]
+    data[0] = data[0][0:2]
+    data[0] = str(int(data[0]) + increment_episodes)
+    episodes.append([num + 1, current_season, *data])
+
+episodes = episodes[:-2]
+
+print("""
+<html>
+<head>
+    <style type="text/css">
+        body {
+            font-family: Helvetica, sans-serif;
+            text-align: center;
+        }
+        #main {
+            column-count: auto;
+            column-width: 250px;
+            column-gap: 2em;
+        }
+        img {
+            width: 200px;
+            display: block;
+            margin: 0 auto;
+        }
+        .authorgroup {
+            width: 100%;
+            display: inline-block;
+            margin: 0 0 1em;
+            border: 1px solid black;
+            border-radius: 5px;
+        }
+        .episodename {
+            width: 200px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 auto 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Who wrote which American Dad episodes?</h1>
+<div id="main">
+""")
+
+by_author = sorted(episodes, key=itemgetter(5))
+last_author = ""
+for d in by_author:
+    if last_author != d[5]:
+        if last_author != "":
+            print('</div>')
+        last_author = d[5]
+        print('<div class="authorgroup">')
+        print("<h2>%s</h2>" % last_author)
+    print('<img src="./images/%03d.png" />' % d[0])
+    print('<div class="episodename"><p>S%sE%s - %s</p></div>' % (d[1], d[2], d[3]))
+print('</div></div>')
+
+print('</body></html>')
