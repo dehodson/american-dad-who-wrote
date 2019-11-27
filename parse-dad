@@ -94,7 +94,7 @@ for d in by_author:
         last_author = d[5]
         print('<div class="authorgroup">')
         print("<h2>%s</h2>" % last_author)
-    print('<img src="./images/%03d.png" />' % d[0])
+    print('<img src="./images/%03d-sm.png" />' % d[0])
     print('<div class="episodename"><p>S%sE%s - %s</p></div>' % (d[1], d[2], d[3]))
 print('</div></div>')
 
